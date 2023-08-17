@@ -1,15 +1,32 @@
 import {useRouter} from "next/router";
 import Layout from "@/components/layout";
-import {fetch} from "next/dist/compiled/@edge-runtime/primitives";
 import {API_URL} from "@/config";
 import styles from "@/styles/Event.module.css";
 import Link from "next/link";
 import {FaPencilAlt, FaTimes} from "react-icons/fa";
 import Image from "next/image";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function EventPage({ evt }) {
-  const deleteEvent = (e) => {
-    console.log('Delete');
+  const router = useRouter();
+
+  const deleteEvent = async (e) => {
+    if (confirm('Are you sure?')) {
+      const res = await fetch(`${API_URL}/api/events/${evt.id}`,
+        {
+          method: 'DELETE'
+        });
+
+      const data = await res.json();
+      console.log(data)
+
+      if(!res.ok) {
+        toast.error(data.message)
+      } else {
+        router.push('/events');
+      }
+    }
   }
 
   return (
@@ -28,6 +45,7 @@ export default function EventPage({ evt }) {
           {new Date(evt.date).toLocaleDateString('en-US')} at {evt.time}
         </span>
         <h1>{evt.name}</h1>
+        <ToastContainer />
         {evt.image && (
           <div className={styles.image}>
             <Image src={evt.image?.data?.attributes?.formats.medium.url} width={960} height={600}/>
@@ -74,7 +92,7 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({params: {slug}}) {
   const res = await fetch(`${API_URL}/api/events?filters[slug][$eq]=${slug}&populate=*`)
-  const event = (await res.json()).data[0].attributes;
+  const event = (await res.json()).data.map(evt => ({...evt.attributes, id: evt.id}))[0];
 
   return {
     props: {
