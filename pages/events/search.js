@@ -52,8 +52,6 @@ export async function getServerSideProps({query: {term}}) {
     encodeValuesOnly: true, // prettify URL
   });
 
-  console.log(query)
-
   const res = await fetch(`${API_URL}/api/events?${query}`)
   const events = (await res.json()).data.map(evt => ({...evt.attributes, id: evt.id}));
 

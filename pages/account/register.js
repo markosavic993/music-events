@@ -3,7 +3,7 @@ import {FaUser} from 'react-icons/fa'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Layout from "@/components/layout";
-import {useContext, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import Link from "next/link";
 import AuthContext from "@/context/AuthContext";
 
@@ -14,6 +14,14 @@ export default function RegisterPage() {
   const [passwordConfirm, setPasswordConfirm] = useState('')
 
   const {register, error} = useContext(AuthContext)
+
+  useEffect(() => {
+    if (error) {
+      const toastId = toast.error(error);
+      // Later, if you want to remove the toast programmatically:
+      // toast.dismiss(toastId);
+    }
+  }, [error]);
 
   const handleSubmit = (e) => {
     e.preventDefault()
